@@ -1,0 +1,57 @@
+package main
+
+import (
+	"log"
+	"os"
+	"fmt"
+	"strings"
+	"strconv"
+)
+
+func main() {
+	//var s int
+	file, err := os.Open("t")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+	fileinfo, err := file.Stat()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	filesize := fileinfo.Size()
+	buffer := make([]byte, filesize)
+	_, err = file.Read(buffer)
+
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	s := strings.Split(string(buffer), ",")
+	for i := 0; i < len(s)/4; i++ {
+		opcode := s[i*4]
+		if opcode == "99" {
+			fmt.Println(s[0])
+			os.Exit(0)
+		}
+		position1, _ := strconv.Atoi(s[i*4+1])
+		valueAtPosition1, _ := strconv.Atoi(s[position1])
+		position2, _ := strconv.Atoi(s[i*4+2])
+		valueAtPosition2, _ := strconv.Atoi(s[position2])
+		target, _ := strconv.Atoi(s[i*4+3])
+		var result int
+		if opcode == "1" {
+			result = valueAtPosition1 + valueAtPosition2
+		} else if opcode == "2" {
+			result = valueAtPosition1 * valueAtPosition2
+		} else {
+			fmt.Println("Error: invalid opp code: " + s[i*4])
+			os.Exit(1)
+		}
+		fmt.Println(target)
+		//fmt.Println(opcode + "-" + s[i*4+1] + "-" + string(valueAtPosition2) + "-" + string(target) + ": " + string(result))
+		s[target] = strconv.Itoa(result)
+		fmt.Println(s[0])
+	}
+}
