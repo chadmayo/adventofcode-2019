@@ -8,6 +8,22 @@ import (
 	"strconv"
 )
 
+func addOp(position1 int, position2 int, target int, program []string) int {
+	valueAtPosition1, _ := strconv.Atoi(program[position1])
+	valueAtPosition2, _ := strconv.Atoi(program[position2])
+	r := valueAtPosition1 + valueAtPosition2
+	program[target] = strconv.Itoa(r)
+	return 4
+}
+
+func multiplyOp(position1 int, position2 int, target int, program []string) int {
+	valueAtPosition1, _ := strconv.Atoi(program[position1])
+	valueAtPosition2, _ := strconv.Atoi(program[position2])
+	r := valueAtPosition1 * valueAtPosition2
+	program[target] = strconv.Itoa(r)
+	return 4
+}
+
 func main() {
 	//var s int
 	file, err := os.Open("t")
@@ -28,41 +44,37 @@ func main() {
 		log.Fatal(err)
 	}
 
-	s_orig := strings.Split(string(buffer), ",")
-	s := make([]string, len(s_orig))
+	program_orig := strings.Split(string(buffer), ",")
+	program := make([]string, len(program_orig))
 	for x := 0; x<=99; x++ {
 		for y := 0; y<=99; y++ {
-			copy(s, s_orig)
-			s[1] = strconv.Itoa(x)
-			s[2] = strconv.Itoa(y)
-			for i := 0; i < len(s)/4; i++ {
-				opcode := s[i*4]
+			copy(program, program_orig)
+			program[1] = strconv.Itoa(x)
+			program[2] = strconv.Itoa(y)
+			i := 0
+			for i < len(program) {
+				opcode := program[i]
 				if opcode == "99" {
-					if s[0] == "19690720" {
+					if program[0] == "19690720" {
 						fmt.Println(x)
 						fmt.Println(y)
 						os.Exit(0)
 					}
-					//fmt.Println(s[0])
-					//os.Exit(0)
 					break
 				}
-				position1, _ := strconv.Atoi(s[i*4+1])
-				valueAtPosition1, _ := strconv.Atoi(s[position1])
-				position2, _ := strconv.Atoi(s[i*4+2])
-				valueAtPosition2, _ := strconv.Atoi(s[position2])
-				target, _ := strconv.Atoi(s[i*4+3])
-				var result int
+				position1, _ := strconv.Atoi(program[i+1])
+				position2, _ := strconv.Atoi(program[i+2])
+				target, _ := strconv.Atoi(program[i+3])
+				var opLength int
 				if opcode == "1" {
-					result = valueAtPosition1 + valueAtPosition2
+					opLength = addOp(position1, position2, target, program)
 				} else if opcode == "2" {
-					result = valueAtPosition1 * valueAtPosition2
+					opLength = multiplyOp(position1, position2, target, program)
 				} else {
-					fmt.Println("Error: invalid opp code: " + s[i*4])
+					fmt.Println("Error: invalid opp code: " + program[i])
 					os.Exit(1)
 				}
-				//fmt.Println(opcode + "-" + s[i*4+1] + "-" + string(valueAtPosition2) + "-" + string(target) + ": " + string(result))
-				s[target] = strconv.Itoa(result)
+				i += opLength
 			}
 		}
 	}
